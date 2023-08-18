@@ -3,12 +3,9 @@ from trisigma import entity
 
 class BrokerageProducerRabbitMQ (base.BaseProducerRabbitMQ):
 
-    def __init__(self, agent_name, prefetch_count=1, logger=None):
+    def __init__(self, agent_name, prefetch_count=1, **kwargs):
         agent_name = f"brokerage::{agent_name}"
-        super().__init__(agent_name, prefetch_count, logger)
-
-    def connect(self, **kwargs):
-        super().connect(**kwargs)
+        super().__init__(agent_name, prefetch_count, logger, **kwargs)
 
     def req_place_order(self, fn):
         async def wrapper(self, order_request, account):

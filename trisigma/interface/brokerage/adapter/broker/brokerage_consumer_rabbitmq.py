@@ -2,9 +2,9 @@ from trisigma import base
 
 class BrokerageConsumerRabbitMQ(base.BaseConsumerRabbitMQ):
 
-    def __init__(self, target_agent, logger=None):
+    def __init__(self, target_agent, logger=None, **conn_params):
         target_agent = f"brokerage::{target_agent}"
-        super().__init__(target_agent, logger=logger)
+        super().__init__(target_agent, logger=logger, **conn_params)
 
     async def place_order(self, order_request, account):
         order_request['instrument'] = str(order_request['instrument'])

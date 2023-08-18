@@ -11,15 +11,17 @@ class BaseProducerRabbitMQ:
     _rpc_adapter = None
     _stream_adapter = None
 
-    def __init__(self, server_name, prefetch_count=1, logger=None):
+    def __init__(self, server_name, prefetch_count=1, logger=None, loop=None, **conn_params):
         self._rpc_exchange = f"{server_name}-rpc"
         self._stream_exchange = f"{server_name}-stream"
         self._queue_name = uuid.uuid4().hex
         self._prefetch_count = prefetch_count
         self._logger = logger or logging.getLogger(__name__)
+        self._conn_params = conn_params
+        self._loop = loop or asyncio.get_event_loop()
 
-    def connect(self, **kwargs):
-        self._connection = RabbitMQConnectionData(**kwargs)
+    def connect(self):
+        self._connection = RabbitMQConnectionData(self._conn_params)
 
     def register(self, name):
         def decorator(fn):
@@ -69,9 +71,8 @@ class BaseProducerRabbitMQ:
             logger.error("Invalid JSON Response: %s" % str(resp), exc_info=True)
             return json.dumps({"status": "error", "message": "Invalid JSON"}).encode()
 
-    def run(self, loop=None):
+    def run(self):
         assert self._connection is not None, "Connection not set"
-        self._loop = loop or asyncio.get_event_loop()
         self._rpc_adapter = self._prepare_rpc_adapter()
         self._stream_adapter = self._prepare_stream_adapter()
         self._loop.create_task(self._rpc_adapter.receive(self._handle, self._queue_name))

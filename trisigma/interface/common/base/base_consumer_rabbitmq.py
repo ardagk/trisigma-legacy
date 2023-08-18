@@ -15,18 +15,18 @@ class BaseConsumerRabbitMQ:
     _pending_subs = []
     _connected = False
 
-    def __init__(self, target, logger=None):
+    def __init__(self, target, logger=None, **conn_params):
         self.target = target
         self._rpc_queue = uuid.uuid4().hex
         self._rpc_exchange = f"{target}-rpc"
         self._stream_queue = uuid.uuid4().hex
         self._stream_exchange = f"{target}-stream"
         self._logger = logger or logging.getLogger(__name__)
-
-    def connect(self, loop=None, **kwargs):
         self._loop = loop or asyncio.get_event_loop()
+        self._conn_params = conn_params
 
-        self._connection = RabbitMQConnectionData(**kwargs)
+    def connect(self):
+        self._connection = RabbitMQConnectionData(**conn_params)
         self._rpc_adapter = self._prepare_rpc_adapter()
         self._stream_adapter = self._prepare_stream_adapter()
         self._loop.create_task(
