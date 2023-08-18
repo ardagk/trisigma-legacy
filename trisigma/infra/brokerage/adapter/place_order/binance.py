@@ -1,6 +1,5 @@
 import math
 from trisigma import entity
-from trisigma import outbound
 from trisigma import middleware
 from trisigma import lib
 from trisigma import files

@@ -19,8 +19,6 @@ from trisigma.api import flag
 from trisigma.api import irepo
 from trisigma.api import base
 
-from trisigma.api import inbound
-from trisigma.api import outbound
 from trisigma.api import interactor
 
 from trisigma.api import middleware
