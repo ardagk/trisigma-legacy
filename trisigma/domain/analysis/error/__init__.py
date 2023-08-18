@@ -1,0 +1,2 @@
+class BadIntervalError (Exception):
+   pass

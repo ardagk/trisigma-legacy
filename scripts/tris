@@ -1,0 +1,3 @@
+#!/bin/bash
+python -m tris_cli "$@"
+

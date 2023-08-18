@@ -1,0 +1,19 @@
+class Order:
+    mark: str
+    account: str
+    fee: int
+    fee_asset: int
+    filled_qty: int
+    filled_quote_qty: int
+    order_id: int
+    instrument: str
+    platform: str
+    price: int
+    qty: int
+    side: str
+    status: str
+    tif: str
+    time: int
+    typ: str
+    update_time: int
+
