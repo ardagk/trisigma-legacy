@@ -15,7 +15,7 @@ class BaseConsumerRabbitMQ:
     _pending_subs = []
     _connected = False
 
-    def __init__(self, target, logger=None, **conn_params):
+    def __init__(self, target, logger=None, loop=None, **conn_params):
         self.target = target
         self._rpc_queue = uuid.uuid4().hex
         self._rpc_exchange = f"{target}-rpc"
