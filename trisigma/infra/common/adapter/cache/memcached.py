@@ -33,8 +33,8 @@ class CacheMemcached (UserDict):
     data = {}
     _data = {}
 
-    def __init__(self):
-        self.mc = _Memcached()
+    def __init__(self, host='localhost', port=11211):
+        self.mc = _Memcached(host, port)
 
     def prepare_key(self, args) -> str:
         if isinstance(args, tuple):
