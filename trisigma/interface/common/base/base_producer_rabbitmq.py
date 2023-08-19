@@ -21,7 +21,7 @@ class BaseProducerRabbitMQ:
         self._loop = loop or asyncio.get_event_loop()
 
     def connect(self):
-        self._connection = RabbitMQConnectionData(self._conn_params)
+        self._connection = RabbitMQConnectionData(**self._conn_params)
 
     def register(self, name):
         def decorator(fn):

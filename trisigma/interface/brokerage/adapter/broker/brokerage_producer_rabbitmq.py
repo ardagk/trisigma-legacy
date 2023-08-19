@@ -3,7 +3,7 @@ from trisigma import entity
 
 class BrokerageProducerRabbitMQ (base.BaseProducerRabbitMQ):
 
-    def __init__(self, agent_name, prefetch_count=1, **kwargs):
+    def __init__(self, agent_name, prefetch_count=1, logger=None, **kwargs):
         agent_name = f"brokerage::{agent_name}"
         super().__init__(agent_name, prefetch_count, logger, **kwargs)
 
