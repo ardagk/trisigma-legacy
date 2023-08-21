@@ -151,7 +151,7 @@ class BrokerageConsumerIBKR ():
         return
 
     def _add_callback(self, event_name, fn):
-        self._callbacks.setdefault(event_name, []).self._ibend(fn)
+        self._callbacks.setdefault(event_name, []).append(fn)
 
     def _account_values_update(self, av):
         if av.tag.startswith('TotalCashBalance') and av.currency != 'BASE':
