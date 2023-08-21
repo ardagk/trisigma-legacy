@@ -17,18 +17,79 @@ class BrokerageConsumerIBKR ():
         self._ib = IB()
         self._loop = util.getLoop()
         self._logger = logger or logging.getLogger(__name__)
+        self._ib.disconnectedEvent += self._on_disconnect
+        self._ib.connectedEvent += self._on_connect
+        self._connection_event = asyncio.Event()
+        self.get_position = self._allow_retries(self.get_position, 3)
 
     def get_loop(self):
         return self._loop
 
     def connect(self):
-        self._ib.connect(self._host, self._port, self._client_id)
+        self._loop.create_task(self._polled_connect())
 
     def run(self):
         pass
 
+    def _allow_retries(self, func, count=1, delay=0.5):
+        async def wrapper(*args, **kwargs):
+            retries = 0
+            while True:
+                try:
+                    await self._ensure_connection(timeout=1)
+                    return await func(*args, **kwargs)
+                except Exception as e:
+                    self._logger.error('Error in %s: %s', func.__name__, e)
+                    retries += 1
+                    if retries > count:
+                        self._logger.critical('Max retries reached for %s', func.__name__)
+                        raise
+                    await asyncio.sleep(delay)
+        return wrapper
+
+    async def _polled_connect(self, intv=15, max_attempts=None):
+        attempt = 0
+        while True:
+            if max_attempts is not None and attempt >= max_attempts:
+                raise ConnectionError(
+                    'Max attempts reached while trying to connect to TWS')
+            try:
+                await self._ib.connectAsync(self._host, self._port, self._client_id)
+                self._connection_event.set()
+                break
+            except Exception as e:
+                self._logger.info('Unsuccessful auto-connect attempt: %s', e)
+                attempt += 1
+                await asyncio.sleep(intv)
+
+    async def _ensure_connection(self, timeout=None):
+        while True:
+            if not self._ib.isConnected():
+                if timeout is None:
+                    await self._connection_event.wait()
+                else:
+                    await asyncio.wait_for(
+                        self._connection_event.wait(),
+                        timeout=timeout)
+            if self._ib.isConnected():
+                break
+            else:
+                await asyncio.sleep(0.3)
+
+
+    async def _on_disconnect(self):
+        self._logger.warning('Disconnected from TWS')
+        self._connection_event.clear()
+        self._loop.create_task(self._polled_connect())
+        pass
+
+    async def _on_connect(self):
+        self._logger.info('Connected to TWS')
+        self._connection_event.set()
+        pass
+
     async def place_order(self, order_request, account):
-        logging.debug(f"place_order request")
+        self._logger.debug(f"place_order request")
         instrument = entity.Instrument.parse(order_request['instrument'])
         if instrument.family != 'stock':
             raise ValueError("Unsupported instrument type")
@@ -90,7 +151,7 @@ class BrokerageConsumerIBKR ():
         return
 
     def _add_callback(self, event_name, fn):
-        self._callbacks.setdefault(event_name, []).append(fn)
+        self._callbacks.setdefault(event_name, []).self._ibend(fn)
 
     def _account_values_update(self, av):
         if av.tag.startswith('TotalCashBalance') and av.currency != 'BASE':
