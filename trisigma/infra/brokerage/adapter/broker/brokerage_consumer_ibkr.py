@@ -15,8 +15,11 @@ class BrokerageConsumerIBKR ():
         self._port = port
         self._client_id = client_id
         self._ib = IB()
-        self._loop = asyncio.get_event_loop()
+        self._loop = util.getLoop()
         self._logger = logger or logging.getLogger(__name__)
+
+    def get_loop(self):
+        return self._loop
 
     def connect(self):
         self._ib.connect(self._host, self._port, self._client_id)

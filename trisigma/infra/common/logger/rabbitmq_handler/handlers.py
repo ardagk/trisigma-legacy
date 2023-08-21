@@ -8,6 +8,7 @@ from pika import credentials
 from .filters import FieldFilter
 from .formatters import JSONFormatter
 from .compat import ExceptionReporter
+import os
 
 class RabbitMQHandler(logging.Handler):
     """
@@ -175,7 +176,8 @@ class RabbitMQHandler(logging.Handler):
 
         except Exception:
             self.channel, self.connection = None, None
-            self.handleError(record)
+            if os.getenv('PRINT_RMQ_ERRORS'):
+                self.handleError(record)
         finally:
             if self.close_after_emit:
                 self.close_connection()

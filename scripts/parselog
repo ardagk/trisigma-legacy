@@ -1,0 +1,36 @@
+#!/usr/bin/python3
+
+import os
+import sys
+import json
+from datetime import datetime
+
+colors = {
+    'DEBUG': '\033[94m',
+    'INFO': '\033[92m',
+    'WARNING': '\033[93m',
+    'ERROR': '\033[91m',
+    'CRITICAL': '\033[91m',
+}
+endcolor = '\033[0m'
+
+def pretty_print(log_data):
+    date_format = '%Y-%m-%d %H:%M:%S.%f'
+    date_str = datetime.fromtimestamp(
+        log_data['created']).strftime(date_format)
+    format_str = '{color}[{asctime}] ({agentname})- {levelname} - {message}{endcolor}'
+    fields = dict(
+        color=colors.get(log_data['levelname'], endcolor),
+        asctime=date_str,
+        agentname=log_data['agent_name'],
+        levelname=log_data['levelname'],
+        message=log_data['msg'],
+        endcolor=endcolor
+    )
+    return format_str.format(**fields)
+
+if __name__ == '__main__':
+    while True:
+        pretty_print(input())
+
+

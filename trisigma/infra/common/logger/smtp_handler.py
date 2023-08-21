@@ -6,7 +6,7 @@ from trisigma import files
 
 class SMTPHandler(logging.StreamHandler):
 
-    def __init__(self, creds_host, creds_user , default_receiver, port=465, smtphost="smtp.gmail.com"):
+    def __init__(self, creds_host, creds_user, default_receiver, port=465, smtphost="smtp.gmail.com"):
         credentials = files.get_credentials(creds_host, creds_user)
         self.usr = credentials["username"]
         self.pwd = credentials["password"]
@@ -14,7 +14,7 @@ class SMTPHandler(logging.StreamHandler):
         self.port = port
         self.smtp_host = smtphost
         self.max_volume = 10
-        self.cooldown = 60
+        self.cooldown = 180
         self.emits = []
         super().__init__()
 
