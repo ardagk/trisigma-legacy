@@ -18,7 +18,7 @@ class RabbitMQHandler(logging.Handler):
     def __init__(self, level=logging.NOTSET, formatter=None,
         host='localhost', port=5672, connection_params=None,
         username=None, password=None,
-        exchange='log', declare_exchange=False,
+        exchange='log', declare_exchange=True,
         routing_key_format="{name}.{level}",
         routing_key_formatter=None,
         close_after_emit=False,
@@ -50,6 +50,11 @@ class RabbitMQHandler(logging.Handler):
         # :content_type:                The format of the message sent to the queue.
 
         super(RabbitMQHandler, self).__init__(level=level)
+        host = os.getenv('RABBITMQ_HOST', host)
+        port = os.getenv('RABBITMQ_PORT', port)
+        username = os.getenv('RABBITMQ_USR', username)
+        password = os.getenv('RABBITMQ_PWD', password)
+
 
         # Important instances/properties.
         self.exchange = exchange
