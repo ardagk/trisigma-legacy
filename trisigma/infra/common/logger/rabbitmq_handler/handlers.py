@@ -55,6 +55,15 @@ class RabbitMQHandler(logging.Handler):
         username = os.getenv('RABBITMQ_USR', username)
         password = os.getenv('RABBITMQ_PWD', password)
 
+        default_client_properties=dict(
+            information="Python logging handler",
+            connection_name= os.getenv('AGENT_NAME')
+        )
+        if connection_params is None:
+            connection_params = {"client_properties":default_client_properties.copy()}
+        elif "client_properties" in connection_params:
+            default_client_properties.update(connection_params["client_properties"])
+            connection_params["client_properties"] = default_client_properties
 
         # Important instances/properties.
         self.exchange = exchange

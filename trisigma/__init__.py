@@ -2,9 +2,11 @@ import os
 
 os.environ.setdefault('CONFIG_DIR', os.path.join(os.getcwd(), 'config'))
 
+"""
 if not os.getenv('NOENV'):
     from dotenv import load_dotenv
     load_dotenv(override=True, dotenv_path=os.path.join(os.path.join(os.getcwd(), '.env')))
+"""
 os.system('export PYTHONPYCACHEPREFIX="$HOME/.cache/pycache/"')
 
 

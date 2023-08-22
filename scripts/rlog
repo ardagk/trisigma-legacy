@@ -1,0 +1,31 @@
+#!/opt/homebrew/bin/python3.10
+
+import os
+import sys
+import asyncio
+import logging
+import logging.config
+from trisigma.infra.common.logger.rabbitmq_handler import RabbitMQHandler
+
+RMQ_HOST = os.getenv("RABBITMQ_HOST", "127.0.0.1")
+RMQ_PORT = os.getenv("RABBITMQ_PORT", 5672)
+RMQ_USR = os.getenv("RABBITMQ_USR", "agent")
+RMQ_PWD = os.getenv("RABBITMQ_PWD", "agent")
+os.environ['AGENT_NAME'] = 'admin'
+
+if __name__ == '__main__':
+    #get the name of this file
+    this_file = os.path.basename(__file__)
+    if len(sys.argv) != 2:
+        print(f"Usage: {this_file} <msg>")
+        sys.exit(1)
+    msg = sys.argv[1]
+    logger = logging.getLogger()
+    handler = RabbitMQHandler(
+        host=RMQ_HOST,
+        port=RMQ_PORT,
+        username=RMQ_USR,
+        password=RMQ_PWD)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    logger.info(msg)
