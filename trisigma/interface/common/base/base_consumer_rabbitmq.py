@@ -26,7 +26,7 @@ class BaseConsumerRabbitMQ:
         self._conn_params = conn_params
 
     def connect(self):
-        self._connection = RabbitMQConnectionData(**conn_params)
+        self._connection = RabbitMQConnectionData(**self._conn_params)
         self._rpc_adapter = self._prepare_rpc_adapter()
         self._stream_adapter = self._prepare_stream_adapter()
         self._loop.create_task(
