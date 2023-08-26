@@ -2,6 +2,7 @@ from ib_insync import *
 from trisigma import entity
 import logging
 import asyncio
+import time
 
 class BrokerageConsumerIBKR ():
 
@@ -29,7 +30,7 @@ class BrokerageConsumerIBKR ():
         self._loop.create_task(self._polled_connect())
 
     def run(self):
-        pass
+        self._loop.create_task(self._connectivity_report_worker(10))
 
     def _allow_retries(self, func, count=1, delay=0.5):
         async def wrapper(*args, **kwargs):
@@ -173,5 +174,21 @@ class BrokerageConsumerIBKR ():
     def _trigger_callbacks(self, event_name, args=(), kwargs={}):
         for cb in self._callbacks[event_name]:
             self._loop.create_task(cb(*args, **kwargs))
+
+
+    async def _connectivity_report_worker(self, delay):
+        asycnio.sleep(delay)
+        is_connected = self._ib.isConnected()
+        conn_name = 'IBKR'
+        logger = logging.getLogger('conn')
+        logger.info(f'{conn_name} connected: {is_connected}')
+        while True:
+            time_left = time.time() % 2
+            await asyncio.sleep(time_left)
+            if is_connected != self._ib.isConnected():
+                is_connected = self._ib.isConnected()
+                logger.info(f'{conn_name} connected: {is_connected}')
+
+
 
 
