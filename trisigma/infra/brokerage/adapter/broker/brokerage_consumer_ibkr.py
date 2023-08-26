@@ -177,17 +177,21 @@ class BrokerageConsumerIBKR ():
 
 
     async def _connectivity_report_worker(self, delay):
-        asycnio.sleep(delay)
-        is_connected = self._ib.isConnected()
         conn_name = 'IBKR'
-        logger = logging.getLogger('conn')
-        logger.info(f'{conn_name} connected: {is_connected}')
-        while True:
-            time_left = time.time() % 2
-            await asyncio.sleep(time_left)
-            if is_connected != self._ib.isConnected():
-                is_connected = self._ib.isConnected()
-                logger.info(f'{conn_name} connected: {is_connected}')
+        try:
+            await asyncio.sleep(delay)
+            is_connected = self._ib.isConnected()
+            logger = logging.getLogger('conn')
+            logger.info(f'{conn_name} connected: {is_connected}')
+            while True:
+                time_left = time.time() % 2
+                await asyncio.sleep(time_left)
+                if is_connected != self._ib.isConnected():
+                    is_connected = self._ib.isConnected()
+                    logger.info(f'{conn_name} connected: {is_connected}')
+        except Exception as e:
+            self._logger.error(f'Error in {conn_name} connectivity report worker: {e}')
+            raise
 
 
 
