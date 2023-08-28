@@ -8,12 +8,12 @@ class BrokerageProducerRabbitMQ (base.BaseProducerRabbitMQ):
         super().__init__(agent_name, prefetch_count, logger, **kwargs)
 
     def req_place_order(self, fn):
-        async def wrapper(self, order_request, account):
+        async def wrapper(order_request, account):
             order_request['instrument'] = entity.Instrument.parse(
                 order_request['instrument'])
             params = dict(order_request=order_request, account=account)
-            return await fn(self, params)
-        super().register("place_order")(fn)
+            return await fn(**params)
+        super().register("place_order")(wrapper)
         return wrapper
 
     def req_modify_order(self, fn):
@@ -36,13 +36,6 @@ class BrokerageProducerRabbitMQ (base.BaseProducerRabbitMQ):
         super().register("get_orders")(fn)
         return fn
 
-    def req_subscribe_position_update(self, fn):
-        super().register("subscribe_position_update")(fn)
-        return fn
-
-    def req_subscribe_order_update(self, fn):
-        super().register("subscribe_order_update")(fn)
-
     async def publish_position_update(self, asset, position, account):
         event_name = f"position_update.{account}"
         data = dict(account=account, asset=asset, position=position)
@@ -51,6 +44,11 @@ class BrokerageProducerRabbitMQ (base.BaseProducerRabbitMQ):
     async def publish_order_update(self, order_update, account):
         event_name = f"order_update.{account}"
         data = dict(account=account, order_update=order_update)
+        await super().publish(event_name, data)
+
+    async def publish_new_order(self, new_order, account):
+        event_name = f"order_update.{account}"
+        data = dict(account=account, new_order=new_order)
         await super().publish(event_name, data)
 
 

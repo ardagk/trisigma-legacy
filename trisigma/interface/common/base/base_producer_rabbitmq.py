@@ -36,10 +36,13 @@ class BaseProducerRabbitMQ:
         except Exception:
             self._logger.error("Invalid JSON message: %s" % str(message), exc_info=True)
             return
-        await self._stream_adapter.publish(
-            body=payload,
-            exchange=self._stream_exchange,
-            routing_key=topic)
+        try:
+            await self._stream_adapter.publish(
+                body=payload,
+                exchange=self._stream_exchange,
+                routing_key=topic)
+        except Exception:
+            self._logger.error("Error publishing message: %s" % str(message), exc_info=True)
 
     async def _handle_request(self, logger, req):
         if "endpoint" not in req or "params" not in req:

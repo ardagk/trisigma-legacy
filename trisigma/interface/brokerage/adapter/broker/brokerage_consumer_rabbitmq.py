@@ -31,14 +31,6 @@ class BrokerageConsumerRabbitMQ(base.BaseConsumerRabbitMQ):
         params = dict(account=account)
         return await self.request("get_orders", params)
 
-    async def subscribe_position_update(self):
-        params = dict()
-        return await self.request("subscribe_position_update", params)
-
-    async def subscribe_order_update(self):
-        params = dict()
-        return await self.request("subscribe_order_update", params)
-
     def on_position_update(self, fn):
         event_name = f"position_update"
         self.subscribe(event_name, fn)
@@ -46,6 +38,11 @@ class BrokerageConsumerRabbitMQ(base.BaseConsumerRabbitMQ):
 
     def on_order_update(self, fn):
         event_name = f"order_update"
+        self.subscribe(event_name, fn)
+        return fn
+
+    def on_new_order(self, fn):
+        event_name = f"new_order"
         self.subscribe(event_name, fn)
         return fn
 

@@ -33,7 +33,7 @@ class BaseConsumerRabbitMQ:
             self._stream_adapter.receive(self._handle, self._stream_queue))
         self._connected = True
 
-    def run():
+    def run(self):
         pass
 
     def _prepare_rpc_adapter(self):
