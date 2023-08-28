@@ -35,18 +35,23 @@ class BrokerageConsumerIBKR ():
             raise ValueError("Unsupported instrument type")
         contract = Stock(instrument.base, 'SMART', instrument.quote)
         if order_request['order_type'] == 'MARKET':
-            order = MarketOrder(
+            cls = MarketOrder
+            params = dict(
                 order_request['side'].lower(),
                 order_request['qty'],
                 account=account)
         elif order_request['order_type'] == 'LIMIT':
-            order = LimitOrder(
+            cls = LimitOrder
+            params = dict(
                 order_request['side'].lower(),
                 order_request['qty'],
                 order_request['price'],
                 account=account)
         else:
             raise ValueError(f"Unknown order type: {order_request['type']}")
+        if 'extra' in order_request:
+            params.update(order_request['extra'])
+        order = cls(**params)
         trade = self._ib.placeOrder(contract, order)
         tracking_id = trade.order.orderId
         return tracking_id
