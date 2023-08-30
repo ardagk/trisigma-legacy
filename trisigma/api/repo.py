@@ -1,2 +1,3 @@
 from trisigma.infra.admin.repository.service_repository.mongo import ServiceRepositoryMongo
+from trisigma.infra.admin.repository.healthcheck_repository_mongo import HealthcheckRepositoryMongo
 from trisigma.infra.brokerage.repository.order_repository.mongo import OrderRepositoryMongo
