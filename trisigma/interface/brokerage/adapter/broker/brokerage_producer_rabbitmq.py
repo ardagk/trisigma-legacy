@@ -1,17 +1,20 @@
 from trisigma import base
 from trisigma import entity
+import logging
 
 class BrokerageProducerRabbitMQ (base.BaseProducerRabbitMQ):
 
     def __init__(self, agent_name, prefetch_count=5, logger=None, **kwargs):
         agent_name = f"brokerage::{agent_name}"
+        self._logger = logger or logging.getLogger(__name__)
         super().__init__(agent_name, prefetch_count, logger, **kwargs)
 
     def req_place_order(self, fn):
-        async def wrapper(order_request, account):
+        async def wrapper(order_request):
+            self._logger.info("[ORQ] Received order request")
             order_request['instrument'] = entity.Instrument.parse(
                 order_request['instrument'])
-            params = dict(order_request=order_request, account=account)
+            params = dict(order_request=order_request)
             return await fn(**params)
         super().register("place_order")(wrapper)
         return wrapper

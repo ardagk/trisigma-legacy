@@ -28,8 +28,8 @@ class BrokerageConsumerIBKR ():
         self._loop.create_task(self._connectivity_report_worker(10))
 
 
-    async def place_order(self, order_request, account):
-        self._logger.debug(f"place_order request")
+    async def place_order(self, order_request):
+        self._logger.info("[ORQ] Placing order")
         instrument = order_request['instrument']
         if instrument.family != 'stock':
             raise ValueError("Unsupported instrument type")
@@ -37,16 +37,15 @@ class BrokerageConsumerIBKR ():
         if order_request['order_type'] == 'MARKET':
             cls = MarketOrder
             params = dict(
-                order_request['side'].lower(),
-                order_request['qty'],
-                account=account)
+                action=order_request['side'].lower(),
+                totalQuantity=order_request['qty']
+            )
         elif order_request['order_type'] == 'LIMIT':
             cls = LimitOrder
             params = dict(
-                order_request['side'].lower(),
-                order_request['qty'],
-                order_request['price'],
-                account=account)
+                action=order_request['side'].lower(),
+                totalQuantity=order_request['qty'],
+                price=order_request['price'])
         else:
             raise ValueError(f"Unknown order type: {order_request['type']}")
         if 'extra' in order_request:
@@ -63,6 +62,7 @@ class BrokerageConsumerIBKR ():
         raise NotImplementedError()
 
     async def get_position(self, asset, account):
+        assert account != None
         for pos in self._ib.positions(account=account):
             if pos.contract.symbol == asset and pos.account == account:
                 return float(pos.position)

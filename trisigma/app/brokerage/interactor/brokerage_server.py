@@ -25,12 +25,12 @@ class BrokerageServer():
         self._consumer.run()
         self._producer.run()
 
-    async def _place_order_wrapper(self, order_request, account):
+    async def _place_order_wrapper(self, order_request):
+        self._logger.info("[ORQ] Pushing order request")
         _order_request = order_request.copy()
-        _order_request['account'] = account
         try:
             self._order_repository.add_order_request(_order_request)
         except Exception as e:
             self._logger.error('Failed to add order request to repository: {}'.format(e))
-        return await self._consumer.place_order(order_request, account)
+        return await self._consumer.place_order(order_request)
 
