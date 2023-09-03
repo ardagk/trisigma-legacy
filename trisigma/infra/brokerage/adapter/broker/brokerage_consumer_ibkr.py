@@ -108,7 +108,11 @@ class BrokerageConsumerIBKR ():
         pass
 
     def _recv_errorEvent(self, reqId, errorCode, errorString, contract):
-        pass
+        try:
+            err_line = f"{str(errorCode)} {str(errorString)}  -  req:{str(reqId)}"
+            self._logger.error(err_line)
+        except Exception:
+            self._logger.error('Error logging ib error event', exc_info=True)
 
     def _recv_accountValueEvent(self, av):
         if av.tag.startswith('TotalCashBalance') and av.currency != 'BASE':

@@ -11,7 +11,7 @@ class HealthcheckRepositoryMongo:
         doc = {'time': time, 'title': title, 'value': value, "desc": desc}
         self._results_coll.insert_one(doc)
 
-    def get_results(self, start_time: int, title: str, desc=None):
-        query = {'time': {'$gte': start_time}, 'title': title, 'desc': desc}
+    def get_results(self, start_time: int, title: str):
+        query = {'time': {'$gte': start_time}, 'title': title}
         cursor = self._results_coll.find(query, {'_id': 0})
         return list(cursor)
