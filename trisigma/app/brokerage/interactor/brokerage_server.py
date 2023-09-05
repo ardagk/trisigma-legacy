@@ -32,5 +32,11 @@ class BrokerageServer():
             self._order_repository.add_order_request(_order_request)
         except Exception as e:
             self._logger.error('Failed to add order request to repository: {}'.format(e))
-        return await self._consumer.place_order(order_request)
+        order_id = await self._consumer.place_order(order_request)
+        if isinstance(order_id,int):
+            _order_request['orderId'] = order_id
+            try:
+                self._order_repository.add_order_execution(_order_request)
+            except Exception as e:
+                self._logger.error('Failed to add order execution to repository: {}'.format(e))
 
