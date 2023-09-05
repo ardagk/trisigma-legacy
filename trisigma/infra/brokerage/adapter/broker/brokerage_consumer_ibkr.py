@@ -131,13 +131,13 @@ class BrokerageConsumerIBKR ():
             account = position.account
             self._trigger_callbacks(event_name, (account, asset, amount))
 
-    def _recv_orderStatusEvent(self, order):
+    def _recv_orderStatusEvent(self, trade):
         if "order_update" in self._callbacks:
-            self._trigger_callbacks("order_update", order)
+            self._trigger_callbacks("order_update", args=(trade,))
 
     def _recv_newOrderEvent(self, order):
         if "new_order" in self._callbacks:
-            self._trigger_callbacks("order_update", order)
+            self._trigger_callbacks("new_order", args=(order,))
 
     def _subscribe_all(self):
         self._ib.disconnectedEvent += self._recv_disconnectEvent
@@ -145,7 +145,8 @@ class BrokerageConsumerIBKR ():
         self._ib.errorEvent += self._recv_errorEvent
         self._ib.accountValueEvent += self._recv_accountValueEvent
         self._ib.positionEvent += self._recv_positionEvent
-        #self._ib.orderStatusEvent += self._recv_orderStatusEvent
+        self._ib.orderStatusEvent += self._recv_orderStatusEvent
+        self._ib.newOrderEvent += self._recv_newOrderEvent
 
 
     def _trigger_callbacks(self, event_name, args=(), kwargs={}):

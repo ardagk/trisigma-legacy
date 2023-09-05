@@ -43,3 +43,14 @@ class OrderRepositoryMongo:
     def add_order_execution(self, order_execution):
         self.db['order_executions'].insert_one(order_execution)
 
+    def add_order_misc(self, order_misc, _id_key, coll):
+        """
+        Upsert `order_misc` to collection `coll` by the string `_id_key`.
+        """
+        _id = order_misc[_id_key]
+        self.db[coll].update_one(
+            {_id_key: _id},
+            {'$set': order_misc},
+            upsert=True
+        )
+

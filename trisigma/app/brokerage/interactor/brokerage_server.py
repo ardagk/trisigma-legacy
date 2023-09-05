@@ -13,9 +13,9 @@ class BrokerageServer():
         self._producer.req_get_position(self._consumer.get_position)
         self._producer.req_get_order_status(self._consumer.get_order_status)
         self._producer.req_get_orders(self._consumer.get_orders)
-        self._consumer.on_position_update(self._producer.publish_position_update)
-        self._consumer.on_order_update(self._producer.publish_order_update)
-        self._consumer.on_new_order(self._producer.publish_new_order)
+        #self._consumer.on_position_update(self._producer.publish_position_update)
+        #self._consumer.on_order_update(self._producer.publish_order_update)
+        #self._consumer.on_new_order(self._producer.publish_new_order)
 
     def connect(self):
         self._consumer.connect()
