@@ -9,12 +9,14 @@ class OrderRepositoryMongo:
         self.client = MongoClient(host, port)
         self.db = self.client[self.DB_NAME]
 
-    def get_order_requests(self, instrument=None, account_name=None):
+    def get_order_requests(self, instrument=None, account_name=None, timespan=None):
         query = {}
         if instrument is not None:
             query['instrument'] = str(instrument)
         if account_name:
             query['account_name'] = account_name
+        if timespan:
+            query['time'] = {'$gt': timespan.start.timestamp(), '$lt': timespan.end.timestamp()}
         cur = self.db['order_requests'].find(query, {'_id': 0})
         result = []
         for doc in cur:
@@ -26,13 +28,18 @@ class OrderRepositoryMongo:
         order_request['instrument'] = str(order_request['instrument'])
         self.db['order_requests'].insert_one(order_request)
 
-    def get_order_executions(self):
-        cur = self.db['order_executions'].find({}, {'_id': 0})
+    def get_order_executions(self, instrument=None, account_name=None, timespan=None):
+        query = {}
+        if instrument is not None:
+            query['instrument'] = str(instrument)
+        if account_name:
+            query['account_name'] = account_name
+        if timespan:
+            query['time'] = {'$gt': timespan.start.timestamp(), '$lt': timespan.end.timestamp()}
+        cur = self.db['order_executions'].find(query, {'_id': 0})
         result = list(cur)
         return result
 
     def add_order_execution(self, order_execution):
         self.db['order_executions'].insert_one(order_execution)
-
-
 
