@@ -1,13 +1,18 @@
 from ib_insync import *
 import logging
 import asyncio
+import exchange_calendars as xcals
 import time
+import pandas as pd
+from datetime import datetime
+import os
+import pickle
 
 class BrokerageConsumerIBKR ():
 
     _callbacks = {}
 
-    def __init__(self, host, port, client_id, logger=None):
+    def __init__(self, host, port, client_id, data_dir=None, logger=None):
         self._host = host
         self._port = port
         self._client_id = client_id
@@ -17,6 +22,7 @@ class BrokerageConsumerIBKR ():
         self._connection_event = asyncio.Event()
         self._subscribe_all()
         self.get_position = self._allow_retries(self.get_position, 3)
+        self._data_dir = data_dir
 
     def get_loop(self):
         return self._loop
@@ -26,6 +32,8 @@ class BrokerageConsumerIBKR ():
 
     def run(self):
         self._loop.create_task(self._connectivity_report_worker(10))
+        if self._data_dir:
+            self._loop.create_task(self._trade_report_worker())
 
 
     async def place_order(self, order_request):
@@ -216,6 +224,38 @@ class BrokerageConsumerIBKR ():
         except Exception as e:
             self._logger.error(f'Error in {conn_name} connectivity report worker: {e}')
             raise
+
+    async def _trade_report_worker(self):
+        try:
+            def save_daily_trades():
+                trades = self._ib.trades()
+                filename = os.path.join(
+                    str(self._data_dir),
+                    "ibkr/trades/{}.pkl".format(
+                        datetime.now().strftime("%Y%m%d")
+                    )
+                )
+                os.makedirs(os.path.dirname(filename), exist_ok=True)
+                with open(filename, "wb") as f:
+                    pickle.dump(trades, f)
+            def is_market_open():
+                cal = xcals.get_calendar("XNYS")
+                pd_ts = pd.Timestamp(time.time(), unit='s', tz='America/New_York')
+                return bool(cal.is_open_at_time(pd_ts))
+            last_market_open = is_market_open()
+            while True:
+                await asyncio.sleep(60)
+                if last_market_open and not is_market_open():
+                    try:
+                        save_daily_trades()
+                    except Exception as e:
+                        self._logger.critical(f'Error saving daily trades: {e}')
+                last_market_open = is_market_open()
+        except Exception as e:
+            self._logger.critical(f'IBKR trade reporter died: {e}')
+            self._logger.error(f'Error in IBKR trade reporter: {e}', exc_info=True)
+            raise
+
 
 
 
