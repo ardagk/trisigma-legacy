@@ -1,2 +1,3 @@
 from trisigma.interface.brokerage.adapter.broker.brokerage_consumer_rabbitmq import BrokerageConsumerRabbitMQ
 from trisigma.interface.brokerage.adapter.broker.brokerage_producer_rabbitmq import BrokerageProducerRabbitMQ
+from trisigma.interface.admin.adapter.agent_healthchecker import AgentHealthchecker

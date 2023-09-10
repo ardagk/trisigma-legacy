@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Define the file path
+file="/tmp/agent_health.txt"
+
+# Check if the file exists
+if [ -e "$file" ]; then
+    # Read the contents of the file
+    status=$(cat "$file")
+
+    # Check if the status is 'HEALTHY'
+    if [ "$status" != "HEALTHY" ]; then
+        echo "Agent is not healthy."
+        exit 1
+    else
+        echo "Agent is healthy."
+        exit 0
+    fi
+else
+    echo "File not found: $file"
+    exit 1
+fi
+
